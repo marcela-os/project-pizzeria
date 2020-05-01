@@ -52,7 +52,62 @@
     menuProduct: Handlebars.compile(document.querySelector(select.templateOf.menuProduct).innerHTML),
   };
 
+	class Product{
+		constructor(id, data){
+			const thisProduct = this;
+			thisProduct.id = id;
+			thisProduct.data = data;
+			thisProduct.renderInMenu();
+			thisProduct.initAccordion();
+			console.log('newProduct', thisProduct);
+		}
+		renderInMenu(){
+			const thisProduct = this;
+
+			const generatedHTML = templates.menuProduct(thisProduct.data);
+			thisProduct.element = utils.createDOMFromHTML(generatedHTML);
+			const menuContainer = document.querySelector(select.containerOf.menu);
+			menuContainer.appendChild(thisProduct.element);
+		}
+		initAccordion(){
+			const thisProduct = this;
+
+			/* znajdż element reagujący na kliknięcie */
+			const clickableTrigger = thisProduct.element.querySelector(select.menuProduct.clickable);
+
+			clickableTrigger.addEventListener('click', function(){
+        event.preventDefault();
+      /*toggle-dodanie klasy jeśli jej nie było */
+        thisProduct.element.classList.toggle('active');
+
+        const activeProducts = document.querySelectorAll('.product.active');
+				console.log('activeProducts', activeProducts);
+        for (let activeProduct in activeProducts) {
+				  if (activeProducts !== thisProduct) {
+            /* remove class active for the active product */
+					  activeProduct.classList.remove('active');
+				  }
+			  }
+	    });
+		}
+	}
+
   const app = {
+		initMenu: function(){
+			const thisApp = this;
+			console.log('thisApp.data', thisApp.data);
+
+			for(let productData in thisApp.data.products){
+				new Product(productData, thisApp.data.products[productData]);
+			}
+    },
+
+		initData: function(){
+			const thisApp = this;
+
+			thisApp.data = dataSource;
+		},
+
     init: function(){
       const thisApp = this;
       console.log('*** App starting ***');
@@ -60,6 +115,9 @@
       console.log('classNames:', classNames);
       console.log('settings:', settings);
       console.log('templates:', templates);
+
+      thisApp.initData();
+			thisApp.initMenu();
     },
   };
 
